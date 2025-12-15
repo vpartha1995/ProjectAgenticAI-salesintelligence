@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Intelligence Agent</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 1rem;
+    }
+
+    .form {
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      gap: 15px;
+      margin-bottom: 30px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .form {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    select, input {
+      padding: 14px 18px;
+      font-size: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      background: white;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    select {
+      cursor: pointer;
+      font-weight: 500;
+      color: #667eea;
+    }
+
+    input {
+      flex: 1;
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    button {
+      padding: 14px 32px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    #result {
+      display: none;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    #result.active {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result-section {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #667eea;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      padding: 15px;
+      margin-bottom: 12px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      transition: all 0.3s ease;
+      line-height: 1.6;
+    }
+
+    ul li:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #667eea;
+    }
+
+    .source-link {
+      color: #667eea;
+      text-decoration: none;
+      word-break: break-all;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .source-link:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid #c33;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state svg {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🚀 Sales Intelligence Agent</h1>
+    <p class="subtitle">Discover insights about companies, news, and leads instantly</p>
+
+    <div class="form">
+      <select id="toolSelect">
+        <option value="company">🏢 Company</option>
+        <option value="news">📰 News</option>
+        <option value="lead">👤 Lead</option>
+      </select>
+
+      <input
+        type="text"
+        id="queryInput"
+        placeholder="Enter company name, news topic, or lead name/email"
+      />
+
+      <button onclick="submitQuery()">Search</button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-text">Analyzing data...</div>
+    </div>
+
+    <div id="result">
+      <div class="result-section">
+        <h2>Summary <span class="badge" id="summaryCount">0</span></h2>
+        <ul id="summaryList"></ul>
+      </div>
+
+      <div class="result-section">
+        <h2>Sources <span class="badge" id="sourceCount">0</span></h2>
+        <ul id="sourceList"></ul>
+      </div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <p>Enter a query above to start your research</p>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+
+    async function submitQuery() {
+      const tool = document.getElementById("toolSelect").value;
+      const query = document.getElementById("queryInput").value.trim();
+
+      if (!query) {
+        alert("Please enter a query");
+        return;
+      }
+
+      const resultDiv = document.getElementById("result");
+      const loadingDiv = document.getElementById("loading");
+      const emptyState = document.getElementById("emptyState");
+      const button = document.querySelector("button");
+
+      loadingDiv.classList.add("active");
+      resultDiv.classList.remove("active");
+      emptyState.style.display = "none";
+      button.disabled = true;
+
+      let endpoint = "";
+      if (tool === "company") endpoint = `${API_BASE}/company`;
+      if (tool === "news") endpoint = `${API_BASE}/news`;
+      if (tool === "lead") endpoint = `${API_BASE}/lead`;
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ query })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        renderResult(data);
+      } catch (error) {
+        console.error("Error:", error);
+        renderError("Failed to fetch data. Please check if the backend server is running on port 5000.");
+      } finally {
+        loadingDiv.classList.remove("active");
+        button.disabled = false;
+      }
+    }
+
+    function renderResult(data) {
+      const resultDiv = document.getElementById("result");
+      const summaryList = document.getElementById("summaryList");
+      const sourceList = document.getElementById("sourceList");
+      const summaryCount = document.getElementById("summaryCount");
+      const sourceCount = document.getElementById("sourceCount");
+
+      summaryList.innerHTML = "";
+      sourceList.innerHTML = "";
+
+      const summaries = data.summary || [];
+      const sources = data.sources || [];
+
+      summaryCount.textContent = summaries.length;
+      sourceCount.textContent = sources.length;
+
+      if (summaries.length === 0 && sources.length === 0) {
+        renderError("No results found. Try a different query.");
+        return;
+      }
+
+      summaries.forEach(point => {
+        const li = document.createElement("li");
+        li.textContent = point;
+        summaryList.appendChild(li);
+      });
+
+      sources.forEach(link => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = link;
+        a.target = "_blank";
+        a.className = "source-link";
+        a.textContent = link;
+        li.appendChild(a);
+        sourceList.appendChild(li);
+      });
+
+      resultDiv.classList.add("active");
+    }
+
+    function renderError(message) {
+      const resultDiv = document.getElementById("result");
+      const summaryList = document.getElementById("summaryList");
+      
+      summaryList.innerHTML = `<div class="error">${message}</div>`;
+      document.getElementById("sourceList").innerHTML = "";
+      document.getElementById("summaryCount").textContent = "0";
+      document.getElementById("sourceCount").textContent = "0";
+      
+      resultDiv.classList.add("active");
+    }
+
+    document.getElementById("queryInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        submitQuery();
+      }
+    });
+  </script>
+</body>
+</html>

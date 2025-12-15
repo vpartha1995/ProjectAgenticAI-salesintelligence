@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+langchain
+langchain-openai
+openai
+requests
+python-dotenv
+streamlit
+pydantic
+flask
+flask-cors
+langchain-openai
+langchain
