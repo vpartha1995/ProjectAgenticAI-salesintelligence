@@ -144,7 +144,7 @@ You are given web search results about a company.
 
 Create a concise summary using ONLY the information below.
 - Focus on key facts about the company
-- Use 3 to 5 bullet points
+- Use 5 to 6 bullet points
 - Each point should be factual and concise
 
 Search Results:
