@@ -17,11 +17,6 @@ The system is instantiated as a single-page web application, offering a dropdown
 **Contribution**  
 This agent demonstrates how modular tool orchestration, combined with LLM summarization, can yield a scalable framework for sales intelligence. Its design foregrounds ethical considerations, reproducibility, and adaptability, positioning it as a prototype for future research in applied AI systems for business intelligence.  
 
-🚀 Sales Intelligence Agent
-
-A Sales Intelligence Agent that provides company insights, technology/news trends, and lead (person) profiles using real-time web data and LLM-powered summarization.
-
-Built for hackathons and demos with a clear separation of tools and a simple web interface.
 
 🔧 Tech Stack
 Backend
