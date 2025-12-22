@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import os
 import requests
@@ -55,10 +55,17 @@ def serper_search(query: str, num_results: int = 5):
 
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=10)
+        # Debug logging: show status and small snippet when things go wrong
         if response.status_code != 200:
+            print(f"Serper search non-200 status: {response.status_code}, body: {response.text[:500]}")
             return []
 
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception as e:
+            print(f"Serper search JSON parse error: {e}, body: {response.text[:500]}")
+            return []
+
         results = []
 
         for item in data.get("organic", []):
@@ -67,6 +74,9 @@ def serper_search(query: str, num_results: int = 5):
                 "snippet": item.get("snippet"),
                 "link": item.get("link")
             })
+
+        if not results:
+            print(f"Serper search returned no organic results for query '{query}' (response keys: {list(data.keys())})")
 
         return results
     except Exception as e:
@@ -83,10 +93,17 @@ def serper_news_search(query: str, num_results: int = 5):
 
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=10)
+        # Debug logging: show status and small snippet when things go wrong
         if response.status_code != 200:
+            print(f"Serper news non-200 status: {response.status_code}, body: {response.text[:500]}")
             return []
 
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception as e:
+            print(f"Serper news JSON parse error: {e}, body: {response.text[:500]}")
+            return []
+
         results = []
 
         for item in data.get("news", []):
@@ -96,6 +113,9 @@ def serper_news_search(query: str, num_results: int = 5):
                 "link": item.get("link"),
                 "date": item.get("date")
             })
+
+        if not results:
+            print(f"Serper news returned no news results for query '{query}' (response keys: {list(data.keys())})")
 
         return results
     except Exception as e:
@@ -285,7 +305,13 @@ Do NOT number the points.
 # =================================================
 @app.route('/')
 def index():
-    return send_from_directory('static', 'index.html')
+    # Serve index.html from 'static/' if it exists there; otherwise serve from project root
+    index_path_static = os.path.join(app.root_path, 'static', 'index.html')
+    if os.path.exists(index_path_static):
+        return send_from_directory('static', 'index.html')
+
+    # Fallback to project root
+    return send_from_directory(app.root_path, 'index.html')
 
 @app.route('/api/company', methods=['POST'])
 def company_endpoint():
@@ -329,6 +355,24 @@ def lead_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/favicon.ico')
+def favicon():
+    # Serve favicon.ico if present; otherwise serve favicon.png; otherwise return a 1x1 PNG placeholder
+    ico_path = os.path.join(app.root_path, 'static', 'favicon.ico')
+    png_path = os.path.join(app.root_path, 'static', 'favicon.png')
+
+    if os.path.exists(ico_path):
+        return send_from_directory('static', 'favicon.ico', mimetype='image/x-icon')
+
+    if os.path.exists(png_path):
+        return send_from_directory('static', 'favicon.png', mimetype='image/png')
+
+    # Generate a 1x1 transparent PNG as a placeholder
+    import base64
+    png_b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAn8B9jYwWwAAAABJRU5ErkJggg=='
+    png_bytes = base64.b64decode(png_b64)
+    return Response(png_bytes, mimetype='image/png')
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "healthy"})
@@ -337,4 +381,18 @@ def health():
 # RUN SERVER
 # =================================================
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Start a background thread to open the app in the default browser
+    # Wait briefly to allow the server to start before opening
+    import threading, webbrowser, time
+
+    def _open_browser():
+        time.sleep(0.8)
+        try:
+            webbrowser.open("http://127.0.0.1:5000")
+        except Exception:
+            pass
+
+    threading.Thread(target=_open_browser, daemon=True).start()
+
+    # Run the Flask development server without the auto-reloader (prevents double browser opens)
+    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False)

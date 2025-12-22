@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sales Intelligence Agent</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Font -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --panel: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --assistant: #f9fafb;
+      --accent: #10a37f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Layout */
+    .app {
+      max-width: 860px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    header span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* Chat Area */
+    .chat {
+      flex: 1;
+      padding: 24px 16px;
+      overflow-y: auto;
+    }
+
+    .message {
+      max-width: 720px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .user {
+      margin-left: auto;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .assistant {
+      background: var(--assistant);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .assistant h3 {
+      margin: 0 0 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Thinking */
+    .thinking {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Input */
+    .input-bar {
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+      padding: 14px;
+      display: flex;
+      gap: 10px;
+    }
+
+    select,
+    input {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    select {
+      min-width: 120px;
+      background: white;
+    }
+
+    input {
+      flex: 1;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Empty */
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      margin-top: 80px;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <h1>Agentic AI for Sales</h1>
+      <span>Sales Intelligence Assistant</span>
+    </header>
+
+    <div class="chat" id="chat">
+      <div class="assistant message">
+        👋 Hi, I’m your Sales Intelligence Agent. Ask me about a
+        <strong>company</strong>, <strong>news topic</strong>, or a
+        <strong>sales lead</strong> and I’ll analyze it for you.
+      </div>
+
+      <div class="empty" id="emptyState">
+        Your research conversation will appear here.
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <select id="toolSelect">
+        <option value="company">Company</option>
+        <option value="news">News</option>
+        <option value="lead">Lead</option>
+      </select>
+
+      <input
+        id="queryInput"
+        placeholder="Ask a question or enter a name..."
+      />
+
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:5000/api";
+
+    const chat = document.getElementById("chat");
+    const emptyState = document.getElementById("emptyState");
+    const queryInput = document.getElementById("queryInput");
+    const toolSelect = document.getElementById("toolSelect");
+    const sendBtn = document.getElementById("sendBtn");
+
+    async function submitQuery() {
+      const query = queryInput.value.trim();
+      if (!query) return;
+
+      emptyState.style.display = "none";
+      sendBtn.disabled = true;
+
+      const userMsg = document.createElement("div");
+      userMsg.className = "message user";
+      userMsg.textContent = query;
+      chat.appendChild(userMsg);
+
+      const thinking = document.createElement("div");
+      thinking.className = "message assistant thinking";
+      thinking.textContent = "Thinking…";
+      chat.appendChild(thinking);
+
+      chat.scrollTop = chat.scrollHeight;
+
+      const endpoint = `${API_BASE}/${toolSelect.value}`;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query })
+        });
+
+        const data = await res.json();
+        thinking.remove();
+        renderAssistant(data);
+      } catch (err) {
+        thinking.textContent = "⚠️ Unable to reach the backend server.";
+      } finally {
+        sendBtn.disabled = false;
+        queryInput.value = "";
+      }
+    }
+
+    function renderAssistant(data) {
+      const msg = document.createElement("div");
+      msg.className = "message assistant";
+
+      let html = "";
+
+      if (data.summary && data.summary.length) {
+        html += "<h3>Summary</h3><ul>";
+        data.summary.forEach(s => {
+          html += `<li>${s}</li>`;
+        });
+        html += "</ul>";
+      }
+
+      if (data.sources && data.sources.length) {
+        html += "<h3>Sources</h3><ul>";
+        data.sources.forEach(s => {
+          html += `<li><a href="${s}" target="_blank">${s}</a></li>`;
+        });
+        html += "</ul>";
+      }
+
+      msg.innerHTML = html || "No meaningful results found.";
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    sendBtn.addEventListener("click", submitQuery);
+
+    queryInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") submitQuery();
+    });
+  </script>
+</body>
+</html>
