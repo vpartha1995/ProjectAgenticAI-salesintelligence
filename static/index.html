@@ -12,168 +12,371 @@
   />
 
   <style>
-    :root {
-      --bg: #f7f7f8;
-      --panel: #ffffff;
-      --border: #e5e7eb;
-      --text: #111827;
-      --muted: #6b7280;
-      --assistant: #f9fafb;
-      --accent: #10a37f;
+    :root{
+      --bg: #0b1220;        /* Copilot-like dark background for input area */
+      --panel: #0f1724;     /* darker panel */
+      --card: #0b1220;
+      --border: rgba(255,255,255,0.06);
+      --text: #e6eef4;
+      --muted: #98a0aa;
+      --muted-2: #6b7280;
+      --accent: #6ee7b7;    /* copilot green accent */
+      --accent-2: #10a37f;
+      --assistant: #07101a;
+      --input-bg: #07101a;
+      --white: #ffffff;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, sans-serif;
-      background: var(--bg);
+    *{box-sizing: border-box;}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      /* Agentic AI themed background */
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(16,163,127,0.06), transparent 8%),
+                  linear-gradient(180deg, #041223 0%, #071426 35%, #06111a 100%);
       color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
-    /* Layout */
-    .app {
-      max-width: 860px;
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      padding: 20px 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--panel);
-    }
-
-    header h1 {
-      font-size: 1.1rem;
-      font-weight: 600;
+    /* Container */
+    .app{
+      max-width: none; /* allow full page width */
+      width: 100%;
       margin: 0;
+      padding: 32px 40px; /* page padding so content doesn't touch edges */
+      min-height: calc(100vh - 64px);
+      display:flex;
+      flex-direction:column;
+      gap:24px;
     }
 
-    header span {
-      color: var(--muted);
-      font-size: 0.85rem;
+    header{
+      background: var(--white);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      box-shadow: 0 4px 18px rgba(7,16,26,0.06);
+      border: 1px solid rgba(16,24,40,0.04);
+      max-width: 1200px; /* keep header from growing too wide */
+      margin: 0 auto;
     }
 
-    /* Chat Area */
+    /* Keep chat content centered and readable */
+    .chat { max-width: 1200px; margin: 0 auto; }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    /* Robot-style badge for Agentic AI */
+    .robot-badge{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      background: linear-gradient(180deg, #10a37f, #0b7f5d);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      box-shadow:0 10px 26px rgba(16,163,127,0.14);
+      flex-shrink:0;
+    }
+
+    .robot-badge .eye{
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      background: rgba(2,6,10,0.9);
+      display:inline-block;
+      position:relative;
+      box-shadow: inset 0 -3px 8px rgba(0,0,0,0.35);
+    }
+
+    .robot-badge .eye::after{
+      content: '';
+      position:absolute;
+      top:5px; left:5px;
+      width:10px; height:10px;
+      border-radius:50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 10px rgba(16,163,127,0.5);
+    }
+
+    .robot-badge .antenna{
+      position:absolute;
+      top:-8px;
+      left:50%;
+      transform:translateX(-50%);
+      width:6px; height:12px;
+      background: linear-gradient(180deg, #ffffff, rgba(255,255,255,0.6));
+      border-radius:4px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+      transform-origin: bottom center;
+    }
+
+    /* thinking animations */
+    .robot-badge.thinking { transform: translateY(-2px); }
+
+    .robot-badge.thinking .eye::after {
+      animation: eye-pulse 1.2s infinite ease-in-out;
+      transform-origin: center;
+    }
+
+    @keyframes eye-pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.85; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .robot-badge.thinking .antenna { animation: antenna-bob 1.2s infinite ease-in-out; }
+    @keyframes antenna-bob {
+      0% { transform: translateX(-50%) rotate(0deg); }
+      50% { transform: translateX(-50%) rotate(12deg); }
+      100% { transform: translateX(-50%) rotate(0deg); }
+    }
+
+    .robot-badge.thinking::after{
+      content:'';
+      position:absolute;
+      left:50%; top:50%; transform:translate(-50%,-50%);
+      width:120%; height:120%; border-radius:16px; z-index:-1;
+      box-shadow: 0 10px 30px rgba(16,163,127,0.10);
+      opacity:0.9; animation: badge-glow 1.6s infinite ease-in-out;
+    }
+
+    @keyframes badge-glow{ 0%{ opacity:0.18; } 50%{ opacity:0.48;} 100%{opacity:0.18;} }
+
+    .brand-info h1{ margin:0; font-size:1.15rem; color:#07101a; font-weight:700; }
+    .brand-sub{ display:block; margin-top:4px; color:var(--muted-2); font-size:0.9rem; }
+
+    .status{ display:inline-flex; gap:8px; align-items:center; margin-left:8px; }
+    .status .dot{ width:10px; height:10px; border-radius:50%; background: var(--accent-2); box-shadow:0 2px 6px rgba(16,163,127,0.24); display:inline-block; }
+
+    .clear-cache-btn{
+      background: transparent;
+      border: 1px solid rgba(16,24,40,0.06);
+      color:#07101a;
+      padding:6px 10px;
+      border-radius:8px;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .clear-cache-btn:hover{ box-shadow: 0 6px 18px rgba(9,13,22,0.06); }
+
+    /* Keep older copilot-specific styles compatible */
+    .copilot-badge{ display:none; }
+
+    header h1{
+      margin:0;
+      font-size:1.05rem;
+      color:#0f1724;
+      font-weight:600;
+    }
+    header span{
+      display:block;
+      margin-top:2px;
+      color:var(--muted-2);
+      font-size:0.86rem;
+    }
+
+    /* Chat area */
     .chat {
-      flex: 1;
-      padding: 24px 16px;
+      background: white;
+      border-radius: 12px;
+      padding: 32px 48px; /* increased vertical and side padding for desktop feel */
+      min-height: 520px;
+      max-height: 72vh;
       overflow-y: auto;
+      border: 1px solid rgba(16,24,40,0.06);
+      box-shadow: 0 10px 40px rgba(9,13,22,0.06);
     }
 
     .message {
       max-width: 720px;
-      margin-bottom: 20px;
-      line-height: 1.6;
-      font-size: 0.95rem;
-    }
-
-    .user {
-      margin-left: auto;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
+      line-height:1.6;
+      font-size:0.95rem;
+      margin-bottom:16px;
     }
 
     .assistant {
-      background: var(--assistant);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
+      background: linear-gradient(180deg, #f8fafc, #ffffff);
+      border-radius:12px;
+      padding:14px 16px;
+      border:1px solid #eaeef2;
+      color:#0f1724;
     }
 
-    .assistant h3 {
-      margin: 0 0 10px;
-      font-size: 0.9rem;
-      font-weight: 600;
+    .user {
+      margin-left:auto;
+      background: #ffffff;
+      border-radius:12px;
+      padding:12px 14px;
+      border:1px solid #e6edf0;
+      color:#0f1724;
     }
 
-    ul {
-      padding-left: 18px;
-      margin: 0;
+    .assistant h3{
+      margin:0 0 8px;
+      font-size:0.92rem;
+      font-weight:600;
     }
 
-    li {
-      margin-bottom: 8px;
+    /* Bubble result styling */
+    .result-bubble {
+      background: linear-gradient(180deg, #f8fafc, #ffffff);
+      border-radius: 18px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      border: 1px solid #e6edf0;
+      box-shadow: 0 6px 18px rgba(9,13,22,0.04);
+      max-width: 60%;
     }
 
-    a {
-      color: var(--accent);
-      text-decoration: none;
-      word-break: break-all;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    /* Thinking */
-    .thinking {
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    /* Input */
-    .input-bar {
-      border-top: 1px solid var(--border);
-      background: var(--panel);
-      padding: 14px;
-      display: flex;
-      gap: 10px;
-    }
-
-    select,
-    input {
-      font-family: inherit;
-      font-size: 0.9rem;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-
-    select {
-      min-width: 120px;
-      background: white;
-    }
-
-    input {
-      flex: 1;
-    }
-
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    button {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    /* Empty */
-    .empty {
-      color: var(--muted);
-      text-align: center;
-      margin-top: 80px;
+    .result-bubble .result-text {
       font-size: 0.95rem;
+      color: #0f1724;
+      margin-bottom: 6px;
+    }
+
+    .result-bubble .result-meta {
+      font-size: 0.82rem;
+      color: var(--muted-2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result-bubble .result-meta a {
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+
+    ul{ padding-left:18px; margin:0; }
+    li{ margin-bottom:8px; }
+    a{ color:var(--accent-2); text-decoration:none; word-break: break-word; }
+    a:hover{text-decoration:underline;}
+
+    .thinking{
+      color:var(--muted-2);
+      font-style:italic;
+      font-size:0.9rem;
+    }
+
+    .empty{
+      color:var(--muted-2);
+      text-align:center;
+      margin-top:60px;
+      font-size:0.96rem;
+    }
+
+    /* Input area (Copilot-style) */
+    .input-bar {
+      background: linear-gradient(180deg, rgba(6,10,15,0.02), rgba(6,10,15,0.02));
+      padding: 22px 0; /* vertical padding to allow full-width input */
+      display:flex;
+      justify-content:center;
+      box-shadow: 0 -10px 40px rgba(11,18,32,0.12);
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .input-wrap{
+      width: calc(100% - 80px); /* span the page width minus app padding */
+      max-width: none; /* allow full width */
+      background: linear-gradient(180deg, #071427, #07101a);
+      border-radius:22px;
+      padding:18px 20px;
+      display:flex;
+      gap:16px;
+      align-items:center;
+      box-shadow: 0 14px 38px rgba(11,18,32,0.18);
+      border:1px solid rgba(255,255,255,0.06);
+      margin: 0 auto; /* center within page padding */
+    }
+
+    /* Tools (checkbox chips) */
+    .tools{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .tool{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.04);
+      color:#ffffff; /* white label text for visibility */
+      font-size:0.92rem;
+      font-weight:600;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .tool input{
+      width:18px;
+      height:18px;
+      cursor:pointer;
+      accent-color: var(--accent-2);
+    }
+
+    .tool.active{
+      background: linear-gradient(180deg, rgba(16,163,127,0.12), rgba(16,163,127,0.06));
+      border-color: rgba(16,163,127,0.18);
+      color: #ffffff; /* keep white text when active */
+      box-shadow: 0 6px 18px rgba(16,163,127,0.08);
+    }
+
+    .query{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:1;
+    }
+
+    .query input{
+      width:100%;
+      padding:18px 20px;
+      border-radius:14px;
+      border:2px solid rgba(255,255,255,0.18); /* stronger white outline */
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:#ffffff; /* ensure typed text is white */
+      font-size:1.05rem;
+      outline:none;
+      transition: box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .query input::placeholder{ color: rgba(255,255,255,0.6); }
+
+    .query input:focus{
+      box-shadow: 0 0 0 10px rgba(110,231,183,0.06);
+      border-color: #ffffff; /* white outline on focus */
+    }
+
+    button.send{
+      background: linear-gradient(180deg, var(--accent-2), #34d399);
+      border:none;
+      color:white;
+      padding:10px 16px;
+      border-radius:10px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    button.send:disabled{ opacity:0.6; cursor:not-allowed; }
+
+    @media (max-width:640px){
+      .app{ margin:12px; }
+      header{ padding:12px; }
+      .input-wrap{ padding:10px; gap:8px; }
+      .tool{ padding:6px 8px; font-size:0.86rem; }
     }
   </style>
 </head>
@@ -181,8 +384,19 @@
 <body>
   <div class="app">
     <header>
-      <h1>Agentic AI for Sales</h1>
-      <span>Sales Intelligence Assistant</span>
+      <div class="brand" style="align-items:center;">
+        <div class="robot-badge" aria-hidden="true">
+          <div class="antenna"></div>
+          <div class="eye"></div>
+        </div>
+
+        <div class="brand-info" style="margin-left:12px;">
+          <h1>Agentic AI — Sales Agent</h1>
+          <span class="brand-sub">Smart sales assistant <span class="status"><span class="dot"></span> Online</span></span>
+        </div>
+
+
+      </div>
     </header>
 
     <div class="chat" id="chat">
@@ -197,53 +411,120 @@
       </div>
     </div>
 
-    <div class="input-bar">
-      <select id="toolSelect">
-        <option value="company">Company</option>
-        <option value="news">News</option>
-        <option value="lead">Lead</option>
-      </select>
+    <div class="input-bar" role="region" aria-label="Query area">
+      <div class="input-wrap">
+        <div class="tools" role="toolbar" aria-label="Select tool">
+          <!-- Styled checkboxes. They act like single-select to keep backend endpoints intact -->
+          <label class="tool active" id="tool-company">
+            <input type="checkbox" name="tool" value="company" checked aria-checked="true" />
+            Company
+          </label>
 
-      <input
-        id="queryInput"
-        placeholder="Ask a question or enter a name..."
-      />
+          <label class="tool" id="tool-news">
+            <input type="checkbox" name="tool" value="news" aria-checked="false" />
+            News
+          </label>
 
-      <button id="sendBtn">Send</button>
+          <label class="tool" id="tool-lead">
+            <input type="checkbox" name="tool" value="lead" aria-checked="false" />
+            Lead
+          </label>
+        </div>
+
+        <div class="query">
+          <input id="queryInput" placeholder="Ask a question or enter a name..." aria-label="Query input" />
+          <button id="sendBtn" class="send">Send</button>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Removed duplicate script block here to avoid redeclaration of top-level constants.
+       The consolidated script lives once below (near the end of the file). -->
   <script>
     const API_BASE = "http://localhost:5000/api";
 
     const chat = document.getElementById("chat");
     const emptyState = document.getElementById("emptyState");
     const queryInput = document.getElementById("queryInput");
-    const toolSelect = document.getElementById("toolSelect");
     const sendBtn = document.getElementById("sendBtn");
+    const robotBadge = document.querySelector('.robot-badge');
 
-    async function submitQuery() {
+    // Collect tool labels to replicate single-select behavior while keeping checkbox semantics
+    const toolLabels = [
+      document.getElementById("tool-company"),
+      document.getElementById("tool-news"),
+      document.getElementById("tool-lead")
+    ];
+
+    // Make checkboxes behave like a single-select (only one active at a time).
+    toolLabels.forEach(label => {
+      const cb = label.querySelector("input");
+      label.addEventListener("click", (e) => {
+        // Prevent default double toggling if clicked on checkbox directly
+        e.preventDefault();
+
+        // If already checked, keep it checked (we always keep one selected to avoid backend ambiguity)
+        if (!cb.checked) {
+          toolLabels.forEach(l => {
+            l.classList.remove("active");
+            l.querySelector("input").checked = false;
+            l.querySelector("input").setAttribute("aria-checked", "false");
+          });
+          cb.checked = true;
+          cb.setAttribute("aria-checked", "true");
+          label.classList.add("active");
+        } else {
+          // keep it selected
+          cb.checked = true;
+          cb.setAttribute("aria-checked", "true");
+          label.classList.add("active");
+        }
+      });
+    });
+
+    function getSelectedTool(){
+      for (const l of toolLabels){
+        const i = l.querySelector("input");
+        if (i.checked) return i.value;
+      }
+      return "company";
+    }
+
+    async function submitQuery(){
       const query = queryInput.value.trim();
       if (!query) return;
 
       emptyState.style.display = "none";
       sendBtn.disabled = true;
 
+      // user message
       const userMsg = document.createElement("div");
       userMsg.className = "message user";
       userMsg.textContent = query;
       chat.appendChild(userMsg);
 
+      // thinking indicator
       const thinking = document.createElement("div");
       thinking.className = "message assistant thinking";
       thinking.textContent = "Thinking…";
       chat.appendChild(thinking);
-
       chat.scrollTop = chat.scrollHeight;
 
-      const endpoint = `${API_BASE}/${toolSelect.value}`;
+      const tool = getSelectedTool();
+      const endpoint = `${API_BASE}/${tool}`;
+
+      // animate robot while making a live network request
+      if (robotBadge) {
+        robotBadge.classList.remove('thinking'); // ensure clean state
+      }
 
       try {
+        if (robotBadge) {
+          robotBadge.classList.add('thinking');
+          robotBadge.setAttribute('aria-busy', 'true');
+        }
+
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -256,40 +537,68 @@
       } catch (err) {
         thinking.textContent = "⚠️ Unable to reach the backend server.";
       } finally {
+        // stop robot thinking animation
+        if (robotBadge) {
+          robotBadge.classList.remove('thinking');
+          robotBadge.removeAttribute('aria-busy');
+        }
+
         sendBtn.disabled = false;
         queryInput.value = "";
       }
     }
 
-    function renderAssistant(data) {
-      const msg = document.createElement("div");
-      msg.className = "message assistant";
+    function renderAssistant(data){
+      // If no data or empty payload, show default message
+      if (!data || (Array.isArray(data.summary) && data.summary.length === 0 && !(data.sources && data.sources.length) && !(data.references && data.references.length))) {
+        const msg = document.createElement("div");
+        msg.className = "message assistant";
+        msg.textContent = "No meaningful results found.";
+        chat.appendChild(msg);
+        chat.scrollTop = chat.scrollHeight;
+        return;
+      }
 
-      let html = "";
-
+      // Render each summary as a bubble with a single-line combined sources/references meta
       if (data.summary && data.summary.length) {
-        html += "<h3>Summary</h3><ul>";
         data.summary.forEach(s => {
-          html += `<li>${s}</li>`;
+          const bubble = document.createElement("div");
+          bubble.className = "message assistant result-bubble";
+
+          const text = document.createElement("div");
+          text.className = "result-text";
+          text.textContent = s;
+          bubble.appendChild(text);
+
+          const sources = Array.isArray(data.sources) ? data.sources.slice() : [];
+          const refs = Array.isArray(data.references) ? data.references.slice() : [];
+          const combined = Array.from(new Set([...sources, ...refs]));
+
+          if (combined.length) {
+            const meta = document.createElement("div");
+            meta.className = "result-meta";
+            meta.innerHTML = combined.map(link => `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`).join(", ");
+            bubble.appendChild(meta);
+          }
+
+          chat.appendChild(bubble);
         });
-        html += "</ul>";
+      } else {
+        // If there are no summaries, show combined sources/references in one bubble
+        const bubble = document.createElement("div");
+        bubble.className = "message assistant result-bubble";
+        const meta = document.createElement("div");
+        meta.className = "result-meta";
+        const combined = Array.from(new Set([...(Array.isArray(data.sources)?data.sources:[]), ...(Array.isArray(data.references)?data.references:[])]));
+        meta.innerHTML = combined.length ? combined.map(link => `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`).join(", ") : "No sources or references.";
+        bubble.appendChild(meta);
+        chat.appendChild(bubble);
       }
 
-      if (data.sources && data.sources.length) {
-        html += "<h3>Sources</h3><ul>";
-        data.sources.forEach(s => {
-          html += `<li><a href="${s}" target="_blank">${s}</a></li>`;
-        });
-        html += "</ul>";
-      }
-
-      msg.innerHTML = html || "No meaningful results found.";
-      chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
     }
 
     sendBtn.addEventListener("click", submitQuery);
-
     queryInput.addEventListener("keydown", e => {
       if (e.key === "Enter") submitQuery();
     });
