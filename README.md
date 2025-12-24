@@ -1,4 +1,4 @@
-Academic Abstract: Sales Intelligence Agent
+Sales Intelligence Agent
 
 Abstract
 The Sales Intelligence Agent is conceptualized as an intelligent system designed to augment decision-making in sales and business development contexts. It integrates real-time web data retrieval with large language model (LLM)–based summarization to generate structured insights across three domains: organizational intelligence, event and trend monitoring, and lead profiling. The system architecture emphasizes modular tool separation, ethical data usage, and transparent source attribution, making it suitable for experimental deployments, hackathons, and demonstration environments.
